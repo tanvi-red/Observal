@@ -45,19 +45,17 @@ jobs:
 
       # ── Node.js SBOM (web) ───────────────────────────────────
       - uses: pnpm/action-setup@v6
-        with:
-          version: 10
 
       - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: pnpm
-          cache-dependency-path: web/pnpm-lock.yaml
+          cache-dependency-path: pnpm-lock.yaml
 
       - name: Generate Node.js SBOM
         run: |
-          cd web
           pnpm install --frozen-lockfile
+          cd web
           pnpm dlx @cyclonedx/cdxgen -o ../sbom-node.cdx.json
 
       # ── Vulnerability check (non-blocking) ───────────────────

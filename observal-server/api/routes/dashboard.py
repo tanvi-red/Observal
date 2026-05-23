@@ -13,6 +13,7 @@ from datetime import datetime as dt
 import structlog
 from fastapi import APIRouter, Depends, Query
 from fastapi_cache.decorator import cache
+from loguru import logger as optic
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -99,6 +100,7 @@ async def overview_stats(
     range_: str | None = Query(None, alias="range"),
     db: AsyncSession = Depends(get_db),
 ):
+    optic.debug("overview_stats: range={}", range_)
     total_mcps = (
         await db.scalar(
             select(func.count(McpListing.id))
@@ -139,6 +141,7 @@ async def overview_stats(
 @router.get("/overview/top-mcps", response_model=list[TopItem])
 @cache(expire=ds.get_sync_int("data.cache_ttl_dashboard", 60), namespace="dashboard")
 async def top_mcps(db: AsyncSession = Depends(get_db)):
+    optic.debug("top_mcps called")
     result = await db.execute(
         select(McpDownload.listing_id, func.count(McpDownload.id).label("cnt"), McpListing.name)
         .join(McpListing, McpDownload.listing_id == McpListing.id)
